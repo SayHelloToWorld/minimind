@@ -219,7 +219,7 @@ After this update, maintenance for the entire `minimind-v1` series will be disco
 * Ubuntu==20.04
 * CUDA==12.2
 * Python==3.10.16
-* [requirements.txt](./requirements.txt)
+* [pyproject.toml](./pyproject.toml)
 
 </details>
 
@@ -228,7 +228,7 @@ After this update, maintenance for the entire `minimind-v1` series will be disco
 ```bash
 # Clone repository and install dependencies
 git clone --depth 1 https://github.com/jingyaogong/minimind
-cd minimind && pip install -r requirements.txt -i https://mirrors.aliyun.com/pypi/simple
+cd minimind && uv sync
 ```
 
 ## Ⅰ 🚀 Model Inference

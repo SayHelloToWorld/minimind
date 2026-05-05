@@ -220,7 +220,7 @@ minimind2系列旧模型均经过权重映射+（微调训练）QKVO线性层校
 * Ubuntu==20.04
 * CUDA==12.2
 * Python==3.10.16
-* [requirements.txt](./requirements.txt)
+* [pyproject.toml](./pyproject.toml)
 
 </details>
 
@@ -229,7 +229,7 @@ minimind2系列旧模型均经过权重映射+（微调训练）QKVO线性层校
 ```bash
 # 克隆仓库、安装依赖
 git clone --depth 1 https://github.com/jingyaogong/minimind
-cd minimind && pip install -r requirements.txt -i https://mirrors.aliyun.com/pypi/simple
+cd minimind && uv sync
 ```
 
 ## Ⅰ 🚀 模型推理
