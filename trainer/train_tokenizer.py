@@ -4,15 +4,15 @@ import os
 import json
 from tokenizers import decoders, models, pre_tokenizers, trainers, Tokenizer
 
-DATA_PATH = '../dataset/sft_t2t_mini.jsonl'
+DATA_PATH = '../../sft_t2t.jsonl'
 TOKENIZER_DIR = '../model_learn_tokenizer/'
-VOCAB_SIZE = 6400
+VOCAB_SIZE = 10000
 SPECIAL_TOKENS_NUM = 36
 
 def get_texts(data_path):
     with open(data_path, 'r', encoding='utf-8', errors='ignore') as f:
         for i, line in enumerate(f):
-            if i >= 10000: break # 选10000行测试
+            if i >= 2000000: break # 选10000行测试
             try:
                 data = json.loads(line)
                 contents = [item.get('content') for item in data.get('conversations', []) if item.get('content')]
@@ -44,7 +44,9 @@ def train_tokenizer(data_path, tokenizer_dir, vocab_size, special_tokens_num=SPE
         vocab_size=vocab_size,
         show_progress=True,
         initial_alphabet=pre_tokenizers.ByteLevel.alphabet(),
-        special_tokens=all_special_tokens
+        special_tokens=all_special_tokens,
+        min_frequency=5,
+        Streaming=True
     )
     texts = get_texts(data_path)
     tokenizer.train_from_iterator(texts, trainer=trainer)
@@ -162,6 +164,11 @@ def eval_tokenizer(tokenizer_dir):
             raw_tokens = [tokenizer.convert_ids_to_tokens(int(t)) for t in (token_cache if isinstance(token_cache, list) else [token_cache])]
             print(f'Token ID: {str(display_ids):15} -> Raw: {str(raw_tokens):20} -> Decode Str: {current_decode}')
             token_cache = []
+    tokenizer = AutoTokenizer.from_pretrained(TOKENIZER_DIR)
+
+    # 测试生僻字
+    print(tokenizer.encode("䒑"))  # 应该是 [228, 147, 145] 或合并后的 id
+    print(tokenizer.encode("龘"))  # 应该是不同的字节组合
 
 if __name__ == '__main__':
     train_tokenizer(DATA_PATH, TOKENIZER_DIR, VOCAB_SIZE)

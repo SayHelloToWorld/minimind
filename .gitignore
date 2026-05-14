@@ -1,5 +1,6 @@
 __pycache__/
 *.pyc
+*.jsonl
 .DS_Store
 out
 website/
@@ -7,3 +8,6 @@ docs-minimind/
 
 # UV
 .uv/
+
+# Virtual Environment
+.venv/

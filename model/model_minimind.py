@@ -9,13 +9,13 @@ from transformers.modeling_outputs import MoeCausalLMOutputWithPast
 # 🌏🌎🌍🌏🌎🌍🌏🌎🌍🌏🌎🌍🌏🌎🌍🌏🌎🌍🌏🌎🌍🌏🌎🌍🌏🌎🌍🌏🌎🌍🌏🌎🌍🌏🌎🌍🌏🌎🌍🌏🌎🌍🌏🌎🌍🌏🌎🌍🌏🌎🌍🌏
 class MiniMindConfig(PretrainedConfig):
     model_type = "minimind"
-    def __init__(self, hidden_size=768, num_hidden_layers=8, use_moe=False, **kwargs):
+    def __init__(self, hidden_size=768, num_hidden_layers=10, use_moe=False, **kwargs):
         super().__init__(**kwargs)
         self.hidden_size = hidden_size
         self.num_hidden_layers = num_hidden_layers
         self.use_moe = use_moe
         self.dropout = kwargs.get("dropout", 0.0)
-        self.vocab_size = kwargs.get("vocab_size", 6400)
+        self.vocab_size = kwargs.get("vocab_size", 10000)
         self.bos_token_id = kwargs.get("bos_token_id", 1)
         self.eos_token_id = kwargs.get("eos_token_id", 2)
         self.flash_attn = kwargs.get("flash_attn", True)
@@ -28,7 +28,7 @@ class MiniMindConfig(PretrainedConfig):
         self.rms_norm_eps = kwargs.get("rms_norm_eps", 1e-6)
         self.rope_theta = kwargs.get("rope_theta", 1e6)
         self.tie_word_embeddings = kwargs.get("tie_word_embeddings", True)
-        self.inference_rope_scaling = kwargs.get("inference_rope_scaling", False)
+        self.inference_rope_scaling = kwargs.get("inference_rope_scaling", True)
         self.rope_scaling = {
             "beta_fast": 32,
             "beta_slow": 1,

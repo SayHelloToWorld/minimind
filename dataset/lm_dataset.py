@@ -3,7 +3,7 @@ import torch
 import json
 import os
 import random
-from datasets import load_dataset, Features, Sequence, Value
+from datasets import load_dataset
 os.environ["TOKENIZERS_PARALLELISM"] = "false"
 
 def pre_processing_chat(conversations, add_system_ratio=0.2):
@@ -60,10 +60,16 @@ class SFTDataset(Dataset):
         super().__init__()
         self.tokenizer = tokenizer
         self.max_length = max_length
-        features = Features({'conversations': [{'role': Value('string'), 'content': Value('string'), 'reasoning_content': Value('string'), 'tools': Value('string'), 'tool_calls': Value('string')}]})
-        self.samples = load_dataset('json', data_files=jsonl_path, split='train', features=features)
+        self.samples = []
+        with open(jsonl_path, 'r', encoding='utf-8') as f:
+            for line in f:
+                line = line.strip()
+                if line:
+                    self.samples.append(json.loads(line))
         self.bos_id = tokenizer(f'{tokenizer.bos_token}assistant\n', add_special_tokens=False).input_ids
         self.eos_id = tokenizer(f'{tokenizer.eos_token}\n', add_special_tokens=False).input_ids
+        indices = list(range(len(self.samples)))[::2] 
+        self.samples = torch.utils.data.Subset(self.samples, indices)
 
     def __len__(self):
         return len(self.samples)

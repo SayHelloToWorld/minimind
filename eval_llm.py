@@ -16,7 +16,8 @@ def init_model(args):
             hidden_size=args.hidden_size,
             num_hidden_layers=args.num_hidden_layers,
             use_moe=bool(args.use_moe),
-            inference_rope_scaling=args.inference_rope_scaling
+            inference_rope_scaling=args.inference_rope_scaling,
+            vocab_size=len(tokenizer)
         ))
         moe_suffix = '_moe' if args.use_moe else ''
         ckp = f'./{args.save_dir}/{args.weight}_{args.hidden_size}{moe_suffix}.pth'
@@ -38,7 +39,7 @@ def main():
     parser.add_argument('--hidden_size', default=768, type=int, help="隐藏层维度")
     parser.add_argument('--num_hidden_layers', default=8, type=int, help="隐藏层数量")
     parser.add_argument('--use_moe', default=0, type=int, choices=[0, 1], help="是否使用MoE架构（0=否，1=是）")
-    parser.add_argument('--inference_rope_scaling', default=False, action='store_true', help="启用RoPE位置编码外推（4倍，仅解决位置编码问题）")
+    parser.add_argument('--inference_rope_scaling', default=True, action='store_true', help="启用RoPE位置编码外推（4倍，仅解决位置编码问题）")
     parser.add_argument('--max_new_tokens', default=8192, type=int, help="最大生成长度（注意：并非模型实际长文本能力）")
     parser.add_argument('--temperature', default=0.85, type=float, help="生成温度，控制随机性（0-1，越大越随机）")
     parser.add_argument('--top_p', default=0.95, type=float, help="nucleus采样阈值（0-1）")
@@ -46,6 +47,8 @@ def main():
     parser.add_argument('--historys', default=0, type=int, help="携带历史对话轮数（需为偶数，0表示不携带历史）")
     parser.add_argument('--show_speed', default=1, type=int, help="显示decode速度（tokens/s）")
     parser.add_argument('--device', default='cuda' if torch.cuda.is_available() else 'cpu', type=str, help="运行设备")
+    parser.add_argument("--repetition_penalty", default=1.15, type=float, help="重复惩罚系数（1.0表示不使用，>1.0表示惩罚重复）")
+    parser.add_argument("--top_k", default=0, type=int, help="top-k采样，0表示不使用")
     args = parser.parse_args()
     
     prompts = [
@@ -83,7 +86,7 @@ def main():
             inputs=inputs["input_ids"], attention_mask=inputs["attention_mask"],
             max_new_tokens=args.max_new_tokens, do_sample=True, streamer=streamer,
             pad_token_id=tokenizer.pad_token_id, eos_token_id=tokenizer.eos_token_id,
-            top_p=args.top_p, temperature=args.temperature, repetition_penalty=1
+            top_p=args.top_p, temperature=args.temperature, repetition_penalty=args.repetition_penalty, top_k=args.top_k
         )
         response = tokenizer.decode(generated_ids[0][len(inputs["input_ids"][0]):], skip_special_tokens=True)
         conversation.append({"role": "assistant", "content": response})
